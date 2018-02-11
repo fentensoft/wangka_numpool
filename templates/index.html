@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>王卡选号助手</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+</head>
+<style>
+    body {
+        padding-top: 70px;
+    }
+</style>
+
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">王卡选号助手</a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav" id="app_district">
+                    <div class="btn-group navbar-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span v-text="province"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li v-for="prov in districtCode">
+                                <a href="#" v-on:click="selectProvince" v-text="prov.province" v-bind:code="prov.code" v-bind:group="prov.group"></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group navbar-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span v-text="city"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li v-for="c in cityList">
+                                <a href="#" v-on:click="selectCity" v-text="c.name" v-bind:code="c.code"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" id="app_status">
+                    <li v-if="running">
+                        <a class="glyphicon glyphicon-play" aria-hidden="true" href="#"></a>
+                    </li>
+                    <li v-else>
+                        <a class="glyphicon glyphicon-stop" aria-hidden="true" href="#"></a>
+                    </li>
+                    <li>
+                        <a href="#" v-text="'已抓取' + count + '条'"></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">操作
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li v-if="running">
+                                <a href="#" v-on:click="stop">停止爬虫</a>
+                            </li>
+                            <li v-else>
+                                <a href="#" v-on:click="start">启动爬虫</a>
+                            </li>
+                            <li v-if="running == false">
+                                <a href="#" v-on:click="empty">清空数据（更换省市需要执行）</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4" id="app_num">
+                <div class="panel panel-default">
+                    <div class="panel-heading">筛选设置</div>
+                    <div class="panel-body">
+                        <div class="checkbox" v-for="f in filters">
+                            <label>
+                                <input type="checkbox" v-model="checkedFilters" v-bind:value="f">
+                                <span v-text="f"></span>
+                            </label>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <input type="checkbox" v-model="hasCustomFilter">
+                            </span>
+                            <input type="text" class="form-control" placeholder="自定义字符串（如：2018）" v-model="customFilter">
+                        </div>
+                        <br>
+                        <button class="btn btn-default" type="submit" v-on:click="fetch">查看结果</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <table id="num_table" data-pagination="true" data-page-list="[10, 20, 50, 100]">
+                    <thead>
+                        <tr>
+                            <th data-field="number">号码</th>
+                            <th data-field="tag">标签</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer class="text-center">
+        <p>本软件不得用于商业用途,仅做学习交流</p>
+        <p>Created by:
+            <a target="_blank" href="https://github.com/fentensoft">Tony Liu</a>
+        </p>
+        <p>
+            <a href="mailto:388848@163.com">388848@163.com</a>
+        </p>
+    </footer>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.5.13/vue.min.js"></script>
+    <script>
+        $.app_status = new Vue({
+            el: '#app_status',
+            data: {
+                running: false,
+                count: 0
+            },
+            methods: {
+                start: function (event) {
+                    if ($.app_district.provinceCode != '' && $.app_district.cityCode != '') {
+                        $.get("/api/start", {
+                            provinceCode: $.app_district.provinceCode,
+                            cityCode: $.app_district.cityCode,
+                            groupKey: $.app_district.groupCode
+                        });
+                        $.app_status.running = true;
+                    } else {
+                        alert("请先选择省市")
+                    }
+                },
+                stop: function (event) {
+                    $.get("/api/stop");
+                    $.app_status.running = false;
+
+                },
+                empty: function (event) {
+                    $.get("/api/empty");
+                    $.app_status.count = 0;
+                }
+            }
+        });
+        $.app_district = new Vue({
+            el: '#app_district',
+            data: {
+                province: '请选择省份',
+                city: '请选择城市',
+                provinceCode: '',
+                cityCode: '',
+                groupCode: '',
+                cityList: [],
+                districtCode: []
+            },
+            methods: {
+                selectProvince: function (event) {
+                    this.province = event.target.innerHTML;
+                    this.provinceCode = event.target.getAttribute("code");
+                    this.groupCode = event.target.getAttribute("group");
+                    this.refreshCityList();
+                },
+                selectCity: function (event) {
+                    this.city = event.target.innerHTML;
+                    this.cityCode = event.target.getAttribute("code");
+                },
+                refreshCityList: function (event) {
+                    this.cityList = $.grep(this.districtCode, function (e) { return e.province == $.app_district.province; })[0].city;
+                    this.city = '请选择城市';
+                }
+            },
+            mounted: function () {
+                $.getJSON("/api/district", function (data) {
+                    $.app_district.districtCode = data;
+                });
+            }
+        });
+        $.app_num = new Vue({
+            el: "#app_num",
+            data: {
+                filters: [],
+                checkedFilters: [],
+                hasCustomFilter: false,
+                customFilter: '',
+                numData: []
+            },
+            methods: {
+                fetch: function (event) {
+                    query = { filter: this.checkedFilters.join("|") }
+                    if (this.hasCustomFilter) {
+                        query.custom = this.customFilter;
+                    }
+                    $.getJSON("/api/nums", query, function (data) {
+                        $("#num_table").bootstrapTable('load', data);
+                    })
+                }
+            },
+            mounted: function() {
+                $.getJSON("/api/filters", function (data) {
+                    $.app_num.filters = data;
+                });
+            }
+        });
+        $.refreshStatus = function () {
+            $.getJSON("/api/status", function (data) {
+                $.app_status.running = data.running;
+                $.app_status.count = data.count;
+            })
+        };
+        $.refreshStatus();
+        setInterval(function () {
+            if ($.app_status.running) {
+                $.refreshStatus();
+            }
+        }, 3000);
+        $('#num_table').bootstrapTable({});
+    </script>
+</body>
+
+</html>
