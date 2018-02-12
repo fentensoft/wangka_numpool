@@ -103,7 +103,7 @@
                             <span class="input-group-addon">
                                 <input type="checkbox" v-model="hasCustomFilter">
                             </span>
-                            <input type="text" class="form-control" placeholder="自定义字符串（如：2018）" v-model="customFilter">
+                            <input type="text" class="form-control" placeholder="自定义（支持正则表达式）" v-model="customFilter">
                         </div>
                         <br>
                         <button class="btn btn-default" v-on:click="checkAll">全选</button>

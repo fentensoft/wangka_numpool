@@ -94,7 +94,7 @@ def getNums():
         for f in filters:
             query.append("tag LIKE '%,{},%'".format(f))
     if request.args.get("custom"):
-        query.append("number LIKE '%{}%'".format(request.args.get("custom")))
+        query.append("number REGEXP '{}'".format(request.args.get("custom")))
     conn = getDatabaseConnection()
     cur = conn.cursor()
     if query:
