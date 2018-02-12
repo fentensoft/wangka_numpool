@@ -55,7 +55,8 @@ def status():
             "cityCode": w.cityCode,
             "province": w.province,
             "provinceCode": w.provinceCode,
-            "groupKey": w.groupKey
+            "groupKey": w.groupKey,
+            "autoTerminate": w.autoTerminate
             })
     return jsonify({"running": False, "count": ret})
     
@@ -104,6 +105,14 @@ def getNums():
     conn.close()
     ret = list(map(lambda i: {"number": i[0], "tag": i[1].strip(",")}, ret))
     return jsonify(ret)
+
+
+@app.route("/api/autoTerminate")
+def setAutoTerminate():
+    global w
+    print(request.args)
+    w.autoTerminate = True if request.args.get("autoTerminate", "true") == "true" else False
+    return jsonify({})
 
 
 if __name__ == "__main__":

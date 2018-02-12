@@ -75,6 +75,12 @@
                             <li v-if="running == false">
                                 <a href="#" v-on:click="empty">清空数据（更换省市需要执行）</a>
                             </li>
+                            <li v-if="running && autoTerminate">
+                                <a href="#" v-on:click="toggleTerminate">关闭自动终止</a>
+                            </li>
+                            <li v-if="running && !autoTerminate">
+                                    <a href="#" v-on:click="toggleTerminate">开启自动终止</a>
+                                </li>
                         </ul>
                     </li>
                 </ul>
@@ -136,7 +142,8 @@
             el: '#app_status',
             data: {
                 running: false,
-                count: 0
+                count: 0,
+                autoTerminate: true
             },
             methods: {
                 start: function (event) {
@@ -147,22 +154,30 @@
                             city: $.app_district.city,
                             cityCode: $.app_district.cityCode,
                             groupKey: $.app_district.groupKey
+                        }, function(data) {
+                            $.app_status.running = true;
+                            $.app_status.autoTerminate = true;
                         });
-                        $.app_status.running = true;
                     } else {
                         alert("请先选择省市")
                     }
                 },
                 stop: function (event) {
-                    $.get("/api/stop");
-                    $.app_status.running = false;
-                    
+                    $.get("/api/stop", function(data) {
+                        $.app_status.running = false;
+                    });
                 },
                 empty: function (event) {
                     if (confirm("确定要清空数据库？")) {
-                        $.get("/api/empty");
-                        $.app_status.count = 0;
+                        $.get("/api/empty", function(data) {
+                            $.app_status.count = 0;
+                        });
                     }
+                },
+                toggleTerminate: function(event) {
+                    $.get("/api/autoTerminate", {autoTerminate: !this.autoTerminate}, function(data) {
+                        $.app_status.autoTerminate = !$.app_status.autoTerminate;
+                    });
                 }
             }
         });
@@ -218,14 +233,14 @@
                         $("#num_table").bootstrapTable('load', data);
                     })
                 },
-                checkAll: function(event) {
+                checkAll: function (event) {
                     this.checkedFilters = this.filters;
                 },
                 uncheckAll: function (event) {
                     this.checkedFilters = [];
                 }
             },
-            mounted: function() {
+            mounted: function () {
                 $.getJSON("/api/filters", function (data) {
                     $.app_num.filters = data;
                 });
@@ -235,6 +250,7 @@
             $.getJSON("/api/status", function (data) {
                 $.app_status.running = data.running;
                 $.app_status.count = data.count;
+                $.app_status.autoTerminate = data.autoTerminate;
                 if (data.running) {
                     $.app_district.province = data.province;
                     $.app_district.provinceCode = data.provinceCode;

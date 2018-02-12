@@ -50,6 +50,7 @@ class Worker(threading.Thread):
         self.groupKey = groupKey
         self.rollingCount = []
         self.running = True
+        self.autoTerminate = True
         super(Worker, self).__init__()
 
     def getNum(self):
@@ -86,7 +87,7 @@ class Worker(threading.Thread):
             self.rollingCount.append(c)
             if len(self.rollingCount) == 101:
                 self.rollingCount.pop(0)
-                if sum(self.rollingCount) < 10:
+                if (sum(self.rollingCount) < 10) and (self.autoTerminate):
                     break
             time.sleep(3)
 
