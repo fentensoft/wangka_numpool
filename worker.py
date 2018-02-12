@@ -51,6 +51,7 @@ class Worker(threading.Thread):
         self.rollingCount = []
         self.running = True
         self.autoTerminate = True
+        self.history = []
         super(Worker, self).__init__()
 
     def getNum(self):
@@ -71,6 +72,10 @@ class Worker(threading.Thread):
             cur = conn.cursor()
             cur.executemany("INSERT OR IGNORE INTO tbl_numbers(number, tag) VALUES(?, ?);", ret)
             conn.commit()
+            if cur.rowcount > 0:
+                self.history.append((time.strftime("%Y-%m-%d %H:%M:%S"), cur.rowcount))
+                if len(self.history) == 201:
+                    self.history.pop(0)
             return len(nums), cur.rowcount
         except:
             return 0, 0

@@ -56,7 +56,8 @@ def status():
             "province": w.province,
             "provinceCode": w.provinceCode,
             "groupKey": w.groupKey,
-            "autoTerminate": w.autoTerminate
+            "autoTerminate": w.autoTerminate,
+            "history": w.history
             })
     return jsonify({"running": False, "count": ret})
     

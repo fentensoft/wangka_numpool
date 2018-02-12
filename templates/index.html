@@ -79,8 +79,8 @@
                                 <a href="#" v-on:click="toggleTerminate">关闭自动终止</a>
                             </li>
                             <li v-if="running && !autoTerminate">
-                                    <a href="#" v-on:click="toggleTerminate">开启自动终止</a>
-                                </li>
+                                <a href="#" v-on:click="toggleTerminate">开启自动终止</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -109,6 +109,12 @@
                         <button class="btn btn-default" v-on:click="checkAll">全选</button>
                         <button class="btn btn-default" v-on:click="uncheckAll">取消全选</button>
                         <button class="btn btn-default btn-success" v-on:click="fetch">查看结果(不影响爬虫)</button>
+                    </div>
+                </div>
+                <div class="panel panel-default" v-if="$.app_status.running">
+                    <div class="panel-heading">历史记录</div>
+                    <div class="panel-body">
+                        <textarea id="historyArea" class="form-control" rows="10" style="resize: none;" v-text="$.app_status.strHistory"></textarea>
                     </div>
                 </div>
             </div>
@@ -143,7 +149,8 @@
             data: {
                 running: false,
                 count: 0,
-                autoTerminate: true
+                autoTerminate: true,
+                history: []
             },
             methods: {
                 start: function (event) {
@@ -154,7 +161,7 @@
                             city: $.app_district.city,
                             cityCode: $.app_district.cityCode,
                             groupKey: $.app_district.groupKey
-                        }, function(data) {
+                        }, function (data) {
                             $.app_status.running = true;
                             $.app_status.autoTerminate = true;
                         });
@@ -163,22 +170,35 @@
                     }
                 },
                 stop: function (event) {
-                    $.get("/api/stop", function(data) {
+                    $.get("/api/stop", function (data) {
                         $.app_status.running = false;
                     });
                 },
                 empty: function (event) {
                     if (confirm("确定要清空数据库？")) {
-                        $.get("/api/empty", function(data) {
+                        $.get("/api/empty", function (data) {
                             $.app_status.count = 0;
                         });
                     }
                 },
-                toggleTerminate: function(event) {
-                    $.get("/api/autoTerminate", {autoTerminate: !this.autoTerminate}, function(data) {
+                toggleTerminate: function (event) {
+                    $.get("/api/autoTerminate", { autoTerminate: !this.autoTerminate }, function (data) {
                         $.app_status.autoTerminate = !$.app_status.autoTerminate;
                     });
                 }
+            },
+            computed: {
+                strHistory: function () {
+                    h = []
+                    this.history.forEach(element => {
+                        h.push(element[0] + "新增" + element[1] + "条")
+                    });
+                    return h.join("\n")
+                }
+            },
+            updated: function() {
+                textarea = $("#historyArea");
+                textarea.scrollTop(textarea[0].scrollHeight);
             }
         });
         $.app_district = new Vue({
@@ -251,6 +271,7 @@
                 $.app_status.running = data.running;
                 $.app_status.count = data.count;
                 $.app_status.autoTerminate = data.autoTerminate;
+                $.app_status.history = data.history;
                 if (data.running) {
                     $.app_district.province = data.province;
                     $.app_district.provinceCode = data.provinceCode;
