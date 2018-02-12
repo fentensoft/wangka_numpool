@@ -100,7 +100,9 @@
                             <input type="text" class="form-control" placeholder="自定义字符串（如：2018）" v-model="customFilter">
                         </div>
                         <br>
-                        <button class="btn btn-default" type="submit" v-on:click="fetch">查看结果</button>
+                        <button class="btn btn-default" v-on:click="checkAll">全选</button>
+                        <button class="btn btn-default" v-on:click="uncheckAll">取消全选</button>
+                        <button class="btn btn-default btn-success" v-on:click="fetch">查看结果（不影响爬虫进行）</button>
                     </div>
                 </div>
             </div>
@@ -215,6 +217,12 @@
                     $.getJSON("/api/nums", query, function (data) {
                         $("#num_table").bootstrapTable('load', data);
                     })
+                },
+                checkAll: function(event) {
+                    this.checkedFilters = this.filters;
+                },
+                uncheckAll: function (event) {
+                    this.checkedFilters = [];
                 }
             },
             mounted: function() {
