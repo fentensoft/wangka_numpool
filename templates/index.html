@@ -154,11 +154,13 @@
                 stop: function (event) {
                     $.get("/api/stop");
                     $.app_status.running = false;
-
+                    
                 },
                 empty: function (event) {
-                    $.get("/api/empty");
-                    $.app_status.count = 0;
+                    if (confirm("确定要清空数据库？")) {
+                        $.get("/api/empty");
+                        $.app_status.count = 0;
+                    }
                 }
             }
         });
