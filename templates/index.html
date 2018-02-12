@@ -190,6 +190,9 @@
             computed: {
                 strHistory: function () {
                     h = []
+                    if (this.history.length == 0) {
+                        return ""
+                    }
                     this.history.forEach(element => {
                         h.push(element[0] + "新增" + element[1] + "条")
                     });
@@ -198,7 +201,9 @@
             },
             updated: function() {
                 textarea = $("#historyArea");
-                textarea.scrollTop(textarea[0].scrollHeight);
+                if (textarea.length > 0) {
+                    textarea.scrollTop(textarea[0].scrollHeight);
+                }
             }
         });
         $.app_district = new Vue({
