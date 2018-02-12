@@ -14,7 +14,8 @@ def getDatabaseConnection():
     CREATE TABLE IF NOT EXISTS tbl_numbers
     (
         number VARCHAR(11) NOT NULL PRIMARY KEY,
-        tag VARCHAR(255) DEFAULT ""
+        tag VARCHAR(255) DEFAULT "",
+        time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
     conn.commit()

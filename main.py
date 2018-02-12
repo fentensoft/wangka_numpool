@@ -84,9 +84,9 @@ def getNums():
     conn = getDatabaseConnection()
     cur = conn.cursor()
     if query:
-        cur.execute("SELECT * FROM tbl_numbers WHERE {};".format(" OR ".join(query)))
+        cur.execute("SELECT number,tag FROM tbl_numbers WHERE {};".format(" OR ".join(query)))
     else:
-        cur.execute("SELECT * FROM tbl_numbers;")
+        cur.execute("SELECT number,tag FROM tbl_numbers;")
     ret = cur.fetchall()
     conn.close()
     ret = list(map(lambda i: {"number": i[0], "tag": i[1].strip(",")}, ret))
