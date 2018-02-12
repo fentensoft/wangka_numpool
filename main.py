@@ -22,7 +22,13 @@ def index():
 @app.route("/api/start")
 def start():
     global w
-    w = Worker(request.args.get("provinceCode", "31"), request.args.get("cityCode", "310"), request.args.get("groupKey", "34236498"))
+    w = Worker(
+        request.args.get("province", "上海"),
+        request.args.get("provinceCode", "31"),
+        request.args.get("city", "上海"),
+        request.args.get("cityCode", "310"),
+        request.args.get("groupKey", "34236498")
+        )
     w.start()
     return jsonify({})
 
@@ -42,10 +48,17 @@ def status():
     ret = cur.fetchone()[0]
     conn.close()
     if w:
-        running = w.is_alive()
-    else:
-        running = False
-    return jsonify({"running": running, "count": ret})
+        return jsonify({
+            "running": w.is_alive(),
+            "count": ret,
+            "city": w.city,
+            "cityCode": w.cityCode,
+            "province": w.province,
+            "provinceCode": w.provinceCode,
+            "groupKey": w.groupKey
+            })
+    return jsonify({"running": False, "count": ret})
+    
 
 
 @app.route("/api/district")

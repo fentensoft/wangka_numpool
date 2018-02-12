@@ -140,9 +140,11 @@
                 start: function (event) {
                     if ($.app_district.provinceCode != '' && $.app_district.cityCode != '') {
                         $.get("/api/start", {
+                            province: $.app_district.province,
                             provinceCode: $.app_district.provinceCode,
+                            city: $.app_district.city,
                             cityCode: $.app_district.cityCode,
-                            groupKey: $.app_district.groupCode
+                            groupKey: $.app_district.groupKey
                         });
                         $.app_status.running = true;
                     } else {
@@ -167,7 +169,7 @@
                 city: '请选择城市',
                 provinceCode: '',
                 cityCode: '',
-                groupCode: '',
+                groupKey: '',
                 cityList: [],
                 districtCode: []
             },
@@ -175,7 +177,7 @@
                 selectProvince: function (event) {
                     this.province = event.target.innerHTML;
                     this.provinceCode = event.target.getAttribute("code");
-                    this.groupCode = event.target.getAttribute("group");
+                    this.groupKey = event.target.getAttribute("group");
                     this.refreshCityList();
                 },
                 selectCity: function (event) {
@@ -223,6 +225,14 @@
             $.getJSON("/api/status", function (data) {
                 $.app_status.running = data.running;
                 $.app_status.count = data.count;
+                if (data.running) {
+                    $.app_district.province = data.province;
+                    $.app_district.provinceCode = data.provinceCode;
+                    $.app_district.groupKey = data.groupKey;
+                    $.app_district.refreshCityList();
+                    $.app_district.city = data.city;
+                    $.app_district.cityCode = data.cityCode;
+                }
             })
         };
         $.refreshStatus();

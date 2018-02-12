@@ -41,9 +41,11 @@ class Matcher(object):
 
 class Worker(threading.Thread):
 
-    def __init__(self, provinceCode, cityCode, groupKey):
+    def __init__(self, province, provinceCode, city, cityCode, groupKey):
         self.matchers = list(map(Matcher, regexTags))
+        self.province = province
         self.provinceCode = provinceCode
+        self.city = city
         self.cityCode = cityCode
         self.groupKey = groupKey
         self.rollingCount = []
