@@ -30,6 +30,17 @@
                 <ul class="nav navbar-nav" id="app_district">
                     <div class="btn-group navbar-btn">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span v-text="product"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li v-for="p in products">
+                                <a href="#" v-on:click="selectProduct" v-text="p"></a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group navbar-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span v-text="province"></span>
                             <span class="caret"></span>
                         </button>
@@ -156,6 +167,7 @@
                 start: function (event) {
                     if ($.app_district.provinceCode != '' && $.app_district.cityCode != '') {
                         $.get("/api/start", {
+                            product: $.app_district.product,
                             province: $.app_district.province,
                             provinceCode: $.app_district.provinceCode,
                             city: $.app_district.city,
@@ -190,8 +202,8 @@
             computed: {
                 strHistory: function () {
                     h = []
-                    if (this.history.length == 0) {
-                        return ""
+                    if (this.history == null || this.history.length == 0) {
+                        return "";
                     }
                     this.history.forEach(element => {
                         h.push(element[0] + "新增" + element[1] + "条")
@@ -209,8 +221,10 @@
         $.app_district = new Vue({
             el: '#app_district',
             data: {
+                product: '请选择产品',
                 province: '请选择省份',
                 city: '请选择城市',
+                products: [],
                 provinceCode: '',
                 cityCode: '',
                 groupKey: '',
@@ -218,6 +232,10 @@
                 districtCode: []
             },
             methods: {
+                selectProduct: function (event) {
+                    this.product = event.target.innerHTML;
+                    this.refreshProvinceList();
+                },
                 selectProvince: function (event) {
                     this.province = event.target.innerHTML;
                     this.provinceCode = event.target.getAttribute("code");
@@ -228,15 +246,20 @@
                     this.city = event.target.innerHTML;
                     this.cityCode = event.target.getAttribute("code");
                 },
+                refreshProvinceList: function (event) {
+                    $.getJSON("/api/district", {"product": this.product}, function(data) {
+                        $.app_district.districtCode = data;
+                    })
+                },
                 refreshCityList: function (event) {
                     this.cityList = $.grep(this.districtCode, function (e) { return e.province == $.app_district.province; })[0].city;
                     this.city = '请选择城市';
                 }
             },
             mounted: function () {
-                $.getJSON("/api/district", function (data) {
-                    $.app_district.districtCode = data;
-                });
+                $.getJSON("/api/products", function (data) {
+                    $.app_district.products = data;
+                })
             }
         });
         $.app_num = new Vue({
@@ -278,6 +301,7 @@
                 $.app_status.autoTerminate = data.autoTerminate;
                 $.app_status.history = data.history;
                 if (data.running) {
+                    $.app_district.product = data.product;
                     $.app_district.province = data.province;
                     $.app_district.provinceCode = data.provinceCode;
                     $.app_district.groupKey = data.groupKey;

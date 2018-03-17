@@ -13,17 +13,27 @@ from regex_tags import regexTags
 from database import getDatabaseConnection
 
 
-def getDistrictCode():
-    r = requests.get("https://m.10010.com/king/kingNumCard/init?product=0&channel=67")
+product_list = {
+    "腾讯大王卡": "https://m.10010.com/king/kingNumCard/init?product=0&channel=67",
+    "星粉卡": "https://m.10010.com/king/kingNumCard/samsunginit?product=0",
+    "天神卡（3元不限量）": "https://m.10010.com/king/kingNumCard/wuxianinit?product=0",
+    "天神卡（1元日租包）": "https://m.10010.com/king/kingNumCard/wuxianinit?product=1"
+}
+
+
+def getDistrictCode(init_api):
+    r = requests.get(init_api)
     parsed = json.loads(r.text)
     ret = []
+    print(parsed["proGroupNum"])
     for province in parsed["provinceData"]:
-        tmp = {"code": province["PROVINCE_CODE"], "province": province["PROVINCE_NAME"]}
-        tmp["group"] = parsed["proGroupNum"][tmp["code"]]
-        tmp["city"] = []
-        for city in parsed["cityData"][tmp["code"]]:
-            tmp["city"].append({"name": city["CITY_NAME"], "code": city["CITY_CODE"]})
-        ret.append(tmp)
+        if province["PROVINCE_CODE"] in parsed["proGroupNum"]:
+            tmp = {"code": province["PROVINCE_CODE"], "province": province["PROVINCE_NAME"]}
+            tmp["group"] = parsed["proGroupNum"][tmp["code"]]
+            tmp["city"] = []
+            for city in parsed["cityData"][tmp["code"]]:
+                tmp["city"].append({"name": city["CITY_NAME"], "code": city["CITY_CODE"]})
+            ret.append(tmp)
     return ret
 
 
@@ -41,8 +51,9 @@ class Matcher(object):
 
 class Worker(threading.Thread):
 
-    def __init__(self, province, provinceCode, city, cityCode, groupKey):
+    def __init__(self, product, province, provinceCode, city, cityCode, groupKey):
         self.matchers = list(map(Matcher, regexTags))
+        self.product = product
         self.province = province
         self.provinceCode = provinceCode
         self.city = city

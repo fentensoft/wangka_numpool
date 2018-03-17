@@ -5,7 +5,7 @@ Created by Tony Liu (388848@163.com)
 Date: 02/11/2018
 """
 from flask import Flask, jsonify, render_template, request
-from worker import Worker, getDistrictCode
+from worker import Worker, getDistrictCode, product_list
 from database import getDatabaseConnection
 from regex_tags import regexTags
 
@@ -23,6 +23,7 @@ def index():
 def start():
     global w
     w = Worker(
+        request.args.get("product", "腾讯大王卡"),
         request.args.get("province", "上海"),
         request.args.get("provinceCode", "31"),
         request.args.get("city", "上海"),
@@ -51,6 +52,7 @@ def status():
         return jsonify({
             "running": w.is_alive(),
             "count": ret,
+            "product": w.product,
             "city": w.city,
             "cityCode": w.cityCode,
             "province": w.province,
@@ -62,10 +64,14 @@ def status():
     return jsonify({"running": False, "count": ret})
     
 
+@app.route("/api/products")
+def getProducts():
+    return jsonify(list(product_list.keys()))
+
 
 @app.route("/api/district")
 def getDistrict():
-    return jsonify(getDistrictCode())
+    return jsonify(getDistrictCode(product_list[request.args["product"]]))
 
 
 @app.route("/api/filters")
