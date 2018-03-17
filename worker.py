@@ -25,7 +25,6 @@ def getDistrictCode(init_api):
     r = requests.get(product_list[init_api][0])
     parsed = json.loads(r.text)
     ret = []
-    print(parsed["proGroupNum"])
     for province in parsed["provinceData"]:
         if province["PROVINCE_CODE"] in parsed["proGroupNum"]:
             tmp = {"code": province["PROVINCE_CODE"], "province": province["PROVINCE_NAME"]}

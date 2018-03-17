@@ -121,7 +121,6 @@ def getNums():
 @app.route("/api/autoTerminate")
 def setAutoTerminate():
     global w
-    print(request.args)
     w.autoTerminate = True if request.args.get("autoTerminate", "true") == "true" else False
     return jsonify({})
 
