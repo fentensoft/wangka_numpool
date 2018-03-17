@@ -14,15 +14,15 @@ from database import getDatabaseConnection
 
 
 product_list = {
-    "腾讯大王卡": "https://m.10010.com/king/kingNumCard/init?product=0&channel=67",
-    "星粉卡": "https://m.10010.com/king/kingNumCard/samsunginit?product=0",
-    "天神卡（3元不限量）": "https://m.10010.com/king/kingNumCard/wuxianinit?product=0",
-    "天神卡（1元日租包）": "https://m.10010.com/king/kingNumCard/wuxianinit?product=1"
+    "腾讯大王卡": ("https://m.10010.com/king/kingNumCard/init?product=0&channel=67", "https://m.10010.com/queen/tencent/fill.html?product=0&channel=67"),
+    "星粉卡": ("https://m.10010.com/king/kingNumCard/samsunginit?product=0", "https://m.10010.com/scaffold-show/fill/starfill?product=0"),
+    "天神卡（3元不限量）": ("https://m.10010.com/king/kingNumCard/wuxianinit?product=0", "https://m.10010.com/queen/xiaomi/infinite-fill.html?product=0"),
+    "天神卡（1元日租包）": ("https://m.10010.com/king/kingNumCard/wuxianinit?product=1", "https://m.10010.com/queen/xiaomi/infinite-fill.html?product=1")
 }
 
 
 def getDistrictCode(init_api):
-    r = requests.get(init_api)
+    r = requests.get(product_list[init_api][0])
     parsed = json.loads(r.text)
     ret = []
     print(parsed["proGroupNum"])

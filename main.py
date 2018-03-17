@@ -71,8 +71,12 @@ def getProducts():
 
 @app.route("/api/district")
 def getDistrict():
-    return jsonify(getDistrictCode(product_list[request.args["product"]]))
+    return jsonify(getDistrictCode(request.args["product"]))
 
+
+@app.route("/api/link")
+def getLink():
+    return jsonify({"link": product_list[request.args["product"]][1]})
 
 @app.route("/api/filters")
 def getFilters():

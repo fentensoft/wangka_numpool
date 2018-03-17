@@ -61,6 +61,7 @@
                             </li>
                         </ul>
                     </div>
+                    <a class="btn btn-primary" role="button" v-if="link" v-bind:href="link" target="_blank">申请链接</a>
                 </ul>
                 <ul class="nav navbar-nav navbar-right" id="app_status">
                     <li v-if="running">
@@ -225,6 +226,7 @@
                 province: '请选择省份',
                 city: '请选择城市',
                 products: [],
+                link: "",
                 provinceCode: '',
                 cityCode: '',
                 groupKey: '',
@@ -235,6 +237,9 @@
                 selectProduct: function (event) {
                     this.product = event.target.innerHTML;
                     this.refreshProvinceList();
+                    $.getJSON("/api/link", {"product": this.product}, function (data) {
+                        $.app_district.link = data["link"];
+                    });
                 },
                 selectProvince: function (event) {
                     this.province = event.target.innerHTML;
