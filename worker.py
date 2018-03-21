@@ -18,7 +18,8 @@ product_list = {
     "星粉卡": ("https://m.10010.com/king/kingNumCard/samsunginit?product=0", "https://m.10010.com/scaffold-show/fill/starfill?product=0"),
     "天神卡（3元不限量）": ("https://m.10010.com/king/kingNumCard/wuxianinit?product=0", "https://m.10010.com/queen/xiaomi/infinite-fill.html?product=0"),
     "天神卡（1元日租包）": ("https://m.10010.com/king/kingNumCard/wuxianinit?product=1", "https://m.10010.com/queen/xiaomi/infinite-fill.html?product=1"),
-    "微博V+卡": ("https://m.10010.com/king/kingNumCard/weiboinit?product=2", "https://m.10010.com/queen/sina/fill.html?product=2")
+    "微博V+卡": ("https://m.10010.com/king/kingNumCard/weiboinit?product=2", "https://m.10010.com/queen/sina/fill.html?product=2"),
+    "新米粉卡": ("https://m.10010.com/king/kingNumCard/newmiinit?product=1&channel=1", "https://m.10010.com/queen/xiaomi/new-fill.html?product=1&channel=1")
 }
 
 
